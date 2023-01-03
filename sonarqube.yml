@@ -156,7 +156,7 @@
     insertbefore: "^#sonar.search.javaOpts=-Xmx512m -Xms512m -XX:MaxDirectMemorySize=256m -XX:+HeapDumpOnOutOfMemoryError"
     line: "sonar.search.javaOpts=-Xmx512m -Xms512m -XX:MaxDirectMemorySize=256m -XX:+HeapDumpOnOutOfMemoryError"
     state: present
-        dest: /opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties
+    dest: /opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties
 
 - name: uncomment sonar.web.host
   lineinfile:

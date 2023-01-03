@@ -118,7 +118,7 @@ resource "aws_instance" "Jenkins_instance" {
     host        = self.public_ip
   }
     provisioner "local-exec" {
-    command = "sleep 30; ansible-playbook -i ${self.private_ip}, -u ${var.user} --key-file ${var.key_name}.pem main.yml"
+    command = "sleep 30; ansible-playbook -i ${self.private_ip}, -u ${var.user} --key-file ${var.key_name}.pem jenkinsmain.yml"
   }
 
 

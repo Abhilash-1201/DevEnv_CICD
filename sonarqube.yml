@@ -117,7 +117,7 @@
   lineinfile:
     path: "/opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties"
     regexp: "^sonar.jdbc.password="
-        insertafter: "^#sonar.jdbc.password="
+    insertafter: "^#sonar.jdbc.password="
     line: "sonar.jdbc.password={{dbpassword}}"
 
 - name: Configure SonarQube DB connection string

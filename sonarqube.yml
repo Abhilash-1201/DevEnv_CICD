@@ -225,7 +225,7 @@
     user: "{{sonar_admin_token}}"
     password: "{{sonar_admin_password}}"
     method: POST
-        force_basic_auth: yes
+    force_basic_auth: yes
     body_format: form-urlencoded
     body:
       name: "{{project_key}}"

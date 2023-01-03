@@ -95,11 +95,12 @@
       url:  https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.6.1.59531.zip
       dest: /opt/
 
-- name: unarchive the sonarqube
-  unarchive:
+- name: Unarchive a file that is already on the remote machine
+  ansible.builtin.unarchive:
     src: /opt/sonarqube-9.6.1.59531.zip
     dest: /opt
-
+    remote_src: yes
+    
 - name: Move sonarqube to directory
   shell: sudo mv /opt/sonarqube-9.6.1.59531 /opt/sonarqube
 

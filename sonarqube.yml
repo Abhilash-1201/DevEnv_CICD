@@ -219,7 +219,9 @@
 
     # Update Password for the sonarqube
 - name: update password for sonarqube
-   shell: curl -u admin:admin -X POST "http://{{sonar_url}}:9000/api/users/change_password?login={{sonar_admin_token}}&previousPassword={{sonar_admin_token}}&password={{sonar_admin_password}}"
+  shell: curl -u admin:admin -X POST "http://{{sonar_url}}:9000/api/users/change_password?login={{sonar_admin_token}}&previousPassword={{sonar_admin_token}}&password={{sonar_admin_password}}"
+
+    # Create SonarQube Project
 - name: Create SonarQube Project
   ansible.builtin.uri:
     url: http://{{sonar_url}}:9000/api/projects/create
@@ -228,12 +230,28 @@
     method: POST
     force_basic_auth: yes
     body_format: form-urlencoded
-    body:
+    body: 
+      name: "{{project_name}}"
+      project: "{{project_key}}"
+      visibility: public
+  register: create_sonor_output
+  no_log: false
+  
+    # generate a new user token for this session using the project_key
+- name: Generate a SonarQube Session Token
+  ansible.builtin.uri:
+    url: http://{{sonar_url}}:9000/api/user_tokens/generate
+    user: "{{sonar_admin_token}}"
+    password: "{{sonar_admin_password}}"
+    method: POST
+    force_basic_auth: yes
+    body_format: form-urlencoded
+    body: 
       name: "{{project_key}}"
   register: get_sonor_output
   no_log: true
+
 - set_fact: sonar_token="{{ get_sonor_output.json.token}}"
 
 - debug:
     msg: "{{ sonar_token }}"
-

@@ -59,7 +59,8 @@ locals {
 #Creating a AWS Instance
 #-------------------------------
 
-resource "aws_instance" "my_instance" {
+# SonarQube Instance Creation
+resource "aws_instance" "SonarQube_instance" {
   ami                           = var.ami_id
   associate_public_ip_address   = var.associate_public_ip_address
   instance_type                 = var.instance_type
@@ -74,7 +75,7 @@ resource "aws_instance" "my_instance" {
   depends_on                    = [aws_security_group.ec2-sg]
 
     provisioner "remote-exec" {
-    inline = ["echo 'jenkins'"]
+    inline = ["echo 'SonarQube'"]
    }
       connection {
     type        = "ssh"
@@ -83,7 +84,7 @@ resource "aws_instance" "my_instance" {
     host        = self.public_ip
   }
     provisioner "local-exec" {
-    command = "sleep 30; ansible-playbook -i ${self.private_ip}, -u ${var.user} --key-file ${var.key_name}.pem ansiblemain.yml"
+    command = "sleep 30; ansible-playbook -i ${self.private_ip}, -u ${var.user} --key-file ${var.key_name}.pem sonarqubemain.yml"
   }
 
 
@@ -92,39 +93,39 @@ resource "aws_instance" "my_instance" {
   }
 }
 
-# resource "aws_instance" "sonarqube_instance" {
-#   ami                           = var.ami_id
-#   associate_public_ip_address   = var.associate_public_ip_address
-#   instance_type                 = var.instance_type
-#   availability_zone             = var.availability_zone
-#   key_name                      = var.key_name
-#   subnet_id                     = var.subnet_pub
+###  Jenkins Instance Creation
+resource "aws_instance" "Jenkins_instance" {
+  ami                           = var.ami_id
+  associate_public_ip_address   = var.associate_public_ip_address
+  instance_type                 = var.instance_type
+  availability_zone             = var.availability_zone
+  key_name                      = var.key_name
+  subnet_id                     = var.subnet_pub
+  
+
+  vpc_security_group_ids	 = [aws_security_group.ec2-sg.id]
+  tenancy                        = var.tenancy
+  depends_on			= [aws_instance.SonarQube_instance]
+  
+    provisioner "remote-exec" {
+    inline = ["echo 'Jenkins'"]
+   } 
+   
+   connection {
+    type        = "ssh"
+    user        = var.user
+    private_key = file("ohio.pem")
+    host        = self.public_ip
+  }
+    provisioner "local-exec" {
+    command = "sleep 30; ansible-playbook -i ${self.private_ip}, -u ${var.user} --key-file ${var.key_name}.pem main.yml"
+  }
 
 
-#   vpc_security_group_ids         = [aws_security_group.ec2-sg.id]
-#   tenancy                        = var.tenancy
-#   depends_on                    = [aws_security_group.ec2-sg]
-
-#     provisioner "remote-exec" {
-#     inline = ["echo 'SonarQube'"]
-#    }
-
-#    connection {
-#     type        = "ssh"
-#     user        = var.user
-#     private_key = file("ohio.pem")
-#     host        = self.public_ip
-#   }
-#     provisioner "local-exec" {
-#     command = "sleep 30; ansible-playbook -i ${self.private_ip}, -u ${var.user} --key-file ${var.key_name}.pem sonartest.yml"
-#   }
-
-
-#  tags = {
-#   Name  = var.tags
-#   }
-# }
-
+ tags = {
+  Name	= var.tags
+  }
+}
 
 
 #----------------------------------------

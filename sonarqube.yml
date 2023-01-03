@@ -1,0 +1,238 @@
+# Install and Configure SonarQube
+---
+- name: update packages
+  apt:
+    update_cache: yes
+
+- name: Install Dependencies
+  apt:
+   name: "{{ packages }}"
+   state: present
+  vars:
+    packages:
+        - apt-transport-https
+        - gnupg2
+        - software-properties-common
+        - openjdk-11-jdk
+        - unzip
+
+- name: Install dependencies for PostgreSQL
+  apt: name={{ item }} update_cache=true state=latest
+  with_items:
+  - bash
+  - openssl
+  - libssl-dev
+  - libssl-doc
+
+- name: Install PostgreSQL
+  apt: name={{ item }} update_cache=true state=present
+  with_items:
+  - postgresql
+  - postgresql-contrib
+  - libpq-dev
+  - python3-psycopg2
+
+- name: Ensure the PostgreSQL service is running
+  service: name=postgresql state=started enabled=yes
+
+- name: Install acl
+  apt:
+    state: latest
+     update_cache: true
+    pkg:
+      - acl
+
+
+- name: Create postgres user for my app
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    name: "{{dbuser}}"
+    password: "{{dbpassword}}"
+
+- name: Create Database
+  community.postgresql.postgresql_db:
+    state: present
+    name: "{{dbname}}"
+    owner: sonarqube
+  become: true
+  become_user: postgres
+
+- name: Grant db user access to db
+  community.postgresql.postgresql_privs:
+    type: database
+    database: "{{dbname}}"
+    roles: "sonarqube"
+    grant_option: false
+    privs: all
+  become: true
+  become_user: postgres
+
+- name: Add the user 'sonarqube'
+  ansible.builtin.user:
+    name: sonarqube
+    shell: /bin/bash
+    append: yes
+
+- name: copy the content into file
+  copy:
+    content: |
+        vm.max_map_count=524288
+                fs.file-max=131072
+    dest: /etc/sysctl.conf
+
+- name: Apply changes
+  shell: sudo sysctl --system
+
+- name: create sonar directory
+  file:
+    path: /opt/sonarqube
+    state: directory
+    mode: 0755
+
+- name: Download Sonarqube
+  get_url:
+      url:  https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.6.1.59531.zip
+      dest: /opt/
+
+- name: unarchive the sonarqube
+  unarchive:
+    src: /opt/sonarqube-9.6.1.59531.zip
+    dest: /opt
+
+- name: Move sonarqube to directory
+  shell: sudo mv /opt/sonarqube-9.6.1.59531 /opt/sonarqube
+
+- name: Add permission to the directory
+  shell: sudo chown -R sonarqube:sonarqube /opt/sonarqube
+
+- name: Configure SonarQube DB username
+  lineinfile:
+    path: "/opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties"
+    regexp: "^sonar.jdbc.username="
+    insertafter: "^#sonar.jdbc.username="
+    line: "sonar.jdbc.username={{dbuser}}"
+
+- name: Configure SonarQube DB password
+  lineinfile:
+    path: "/opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties"
+    regexp: "^sonar.jdbc.password="
+        insertafter: "^#sonar.jdbc.password="
+    line: "sonar.jdbc.password={{dbpassword}}"
+
+- name: Configure SonarQube DB connection string
+  lineinfile:
+    path: "/opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties"
+    regexp: "sonar.jdbc.url=jdbc:postgresql://localhost/sonar"
+    insertafter: "^#sonar.jdbc.url=jdbc:postgresql://localhost/sonar"
+    line: "sonar.jdbc.url=jdbc:postgresql://localhost:5432/sonarqube"
+
+
+- name: javaAdditionalOpts
+  lineinfile:
+    path: "/opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties"
+    regexp: "sonar.web.javaAdditionalOpts"
+    insertafter: "^#sonar.web.javaAdditionalOpts="
+    line: "sonar.web.javaAdditionalOpts=-server"
+
+- name: uncomment sonar.log.level=INFO
+  lineinfile:
+    path: "/opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties"
+    regexp: "sonar.log.level=INFO"
+    insertafter: "^#sonar.log.level=INFO"
+    line: "sonar.log.level=INFO"
+
+- name: uncomment sonar.path.logs=logs
+  lineinfile:
+    path: "/opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties"
+    regexp: "sonar.path.logs=logs"
+    insertafter: "^#sonar.path.logs=logs"
+    line: "sonar.path.logs=logs"
+
+
+- name: replacing the comment in the line
+  lineinfile:
+    regexp: "(#sonar.*'search'.* = -Xmx512m -Xms512m)$"
+    insertbefore: "^#sonar.search.javaOpts=-Xmx512m -Xms512m -XX:MaxDirectMemorySize=256m -XX:+HeapDumpOnOutOfMemoryError"
+    line: "sonar.search.javaOpts=-Xmx512m -Xms512m -XX:MaxDirectMemorySize=256m -XX:+HeapDumpOnOutOfMemoryError"
+    state: present
+        dest: /opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties
+
+- name: uncomment sonar.web.host
+  lineinfile:
+    path: "/opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties"
+    regexp: "sonar.web.host=0.0.0.0"
+    insertafter: "^#sonar.web.host=0.0.0.0"
+    line: "sonar.web.host=0.0.0.0"
+
+- name: uncomment sonar.web.port
+  lineinfile:
+    path: "/opt/sonarqube/sonarqube-9.6.1.59531/conf/sonar.properties"
+    regexp: "sonar.web.port=9000"
+    insertafter: "^#sonar.web.port=9000"
+    line: "sonar.web.port=9000"
+
+- name: copy the content into a file
+  copy:
+    content: |
+        [Unit]
+        Description=SonarQube service
+        After=syslog.target network.target
+
+        [Service]
+        Type=forking
+        ExecStart=/opt/sonarqube/sonarqube-9.6.1.59531/bin/linux-x86-64/sonar.sh start
+        ExecStop=/opt/sonarqube/sonarqube-9.6.1.59531/bin/linux-x86-64/sonar.sh stop
+        User=sonarqube
+        Group=sonarqube
+        Restart=always
+        LimitNOFILE=65536
+                LimitNPROC=4096
+
+        [Install]
+        WantedBy=multi-user.target
+    dest: /etc/systemd/system/sonarqube.service
+
+- name: system demon reload
+  shell: sudo systemctl daemon-reload
+
+- name: start the service
+  shell: systemctl start sonarqube.service
+
+- name: enable the service
+  shell: systemctl enable sonarqube.service
+
+- name: Sleep for 60 seconds and continue with play
+  ansible.builtin.wait_for:
+    timeout: 60
+  delegate_to: localhost
+
+- name: get public IP for SonarQube
+  shell: wget -qO- http://ipecho.net/plain ; echo
+  register: public_ip
+
+- name: output
+  debug: msg="{{ public_ip.stdout }}"
+
+- set_fact: sonar_url="{{ public_ip.stdout }}"
+
+    # Update Password for the sonarqube
+- name: update password for sonarqube
+  shell: curl -u admin:admin -X POST "http://{{sonar_url}}:9000/api/users/change_password?login={{sonar_admin_token}}&previousPassword={{sonar_admin_token}}&password={>
+- name: Create SonarQube Project
+  ansible.builtin.uri:
+    url: http://{{sonar_url}}:9000/api/projects/create
+    user: "{{sonar_admin_token}}"
+    password: "{{sonar_admin_password}}"
+    method: POST
+        force_basic_auth: yes
+    body_format: form-urlencoded
+    body:
+      name: "{{project_key}}"
+  register: get_sonor_output
+  no_log: true
+- set_fact: sonar_token="{{ get_sonor_output.json.token}}"
+
+- debug:
+    msg: "{{ sonar_token }}"
+

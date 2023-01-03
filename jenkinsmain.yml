@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  vars:
+    - java_version: 11
+    - admin_user_pass: admin
+    - jenkins_port: 8080
+    - jenkins_user: cloudjournee
+    - jenkins_pass: Cjptech@12
+    - jenkins_fullname: CloudJournee
+    - jenkins_email: nayab.s@cloudjournee.com
+    - dbuser: sonarqube
+    - dbpassword: sonarqube
+    - dbname: sonarqube
+    - sonar_admin_token: admin
+    - sonar_admin_password: abhi
+    - project_name: maven
+    - project_key: maven
+    - sonar_token: sonar_token
+  tasks:
+    #- include_tasks: sonarqube.yml
+      #when: ansible_os_family == "Ubuntu"
+    
+    - include_tasks: Jenkins.yml
+      

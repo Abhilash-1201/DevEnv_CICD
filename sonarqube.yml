@@ -218,7 +218,7 @@
 
     # Update Password for the sonarqube
 - name: update password for sonarqube
-  shell: curl -u admin:admin -X POST "http://{{sonar_url}}:9000/api/users/change_password?login={{sonar_admin_token}}&previousPassword={{sonar_admin_token}}&password={>
+   shell: curl -u admin:admin -X POST "http://{{sonar_url}}:9000/api/users/change_password?login={{sonar_admin_token}}&previousPassword={{sonar_admin_token}}&password={{sonar_admin_password}}"
 - name: Create SonarQube Project
   ansible.builtin.uri:
     url: http://{{sonar_url}}:9000/api/projects/create

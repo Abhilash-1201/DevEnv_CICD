@@ -15,7 +15,7 @@
         - software-properties-common
         - openjdk-11-jdk
         - unzip
-
+        
 - name: Install dependencies for PostgreSQL
   apt: name={{ item }} update_cache=true state=latest
   with_items:
@@ -23,7 +23,7 @@
   - openssl
   - libssl-dev
   - libssl-doc
-
+  
 - name: Install PostgreSQL
   apt: name={{ item }} update_cache=true state=present
   with_items:
@@ -31,14 +31,14 @@
   - postgresql-contrib
   - libpq-dev
   - python3-psycopg2
-
+  
 - name: Ensure the PostgreSQL service is running
   service: name=postgresql state=started enabled=yes
 
 - name: Install acl
   apt:
     state: latest
-     update_cache: true
+    update_cache: true
     pkg:
       - acl
 
@@ -78,7 +78,7 @@
   copy:
     content: |
         vm.max_map_count=524288
-                fs.file-max=131072
+        fs.file-max=131072
     dest: /etc/sysctl.conf
 
 - name: Apply changes
@@ -187,7 +187,7 @@
         Group=sonarqube
         Restart=always
         LimitNOFILE=65536
-                LimitNPROC=4096
+        LimitNPROC=4096
 
         [Install]
         WantedBy=multi-user.target

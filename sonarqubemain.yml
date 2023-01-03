@@ -19,4 +19,4 @@
     - project_key: maven
   tasks:
     - include_tasks: sonarqube.yml
-    - include_tasks: jenkins.yml
+    #- include_tasks: jenkins.yml

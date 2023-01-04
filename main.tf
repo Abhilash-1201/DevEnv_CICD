@@ -131,36 +131,36 @@ resource "aws_instance" "Jenkins_instance" {
 #----------------------------------------
 # creating a elastic ip for ec2 instance
 #-----------------------------------
-resource "aws_eip" "elastic_ip" {
-  instance      = aws_instance.my_instance.id
-  vpc           = true
-  depends_on    = [aws_instance.my_instance]
+#resource "aws_eip" "elastic_ip" {
+#  instance      = aws_instance.SonarQube_instance.id
+#  vpc           = true
+#  depends_on    = [aws_instance.SonarQube_instance]
 
-  tags = {
+#  tags = {
 
-   Name = "${var.tags}-eip"
- }
-}
+#   Name = "${var.tags}-eip"
+#}
+#}
 
 #-------------------------------------------
 # Creating a EBS volume
 #-----------------------------------
-resource "aws_ebs_volume" "volume" {
-  availability_zone = var.availability_zone
-  size              = var.volume_size
-  type              = var.volume_type
-  depends_on    = [aws_instance.my_instance]
+#resource "aws_ebs_volume" "volume" {
+#  availability_zone = var.availability_zone
+#  size              = var.volume_size
+#  type              = var.volume_type
+#  depends_on    = [aws_instance.SonarQube_instance]
 
-  tags = {
-     Name = "${var.tags}-ebs"
-  }
-}
+# tags = {
+#     Name = "${var.tags}-ebs"
+#  }
+#}
 
 #-------------------------------------------
 #Attaching EBS volume to the ec2 instance
 #-------------------------------------------
-resource "aws_volume_attachment" "volume-attach" {
-  device_name = var.device_name
-  volume_id   = aws_ebs_volume.volume.id
-  instance_id = aws_instance.my_instance.id
-}
+#resource "aws_volume_attachment" "volume-attach" {
+#  device_name = var.device_name
+#  volume_id   = aws_ebs_volume.volume.id
+#  instance_id = aws_instance.SonarQube_instance.id
+#}

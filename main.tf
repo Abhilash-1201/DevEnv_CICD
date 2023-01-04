@@ -89,7 +89,7 @@ resource "aws_instance" "SonarQube_instance" {
 
 
  tags = {
-  Name  = "${var.tags} - SonarQube"
+  Name  = "${var.tags}_SonarQube"
   }
 }
 
@@ -123,7 +123,7 @@ resource "aws_instance" "Jenkins_instance" {
 
 
  tags = {
-  Name	= "${var.tags} - Jenkins"
+  Name	= "${var.tags}_Jenkins"
   }
 }
 

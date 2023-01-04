@@ -9,4 +9,4 @@ tenancy                         = "default"
 volume_size                     = 8
 volume_type                     = "gp2"
 device_name                     = "/dev/sdh"
-tags                            = "JenkinsSonarqube"
+tags                            = "DEV"

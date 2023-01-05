@@ -70,6 +70,21 @@
     return_content: yes
   register: crumb
 
+
+    
+- name: JENKINS-CTEDENTIALS | Add Jenkins administration account
+  uri:
+    method: POST
+    url: 'http://localhost:{{ jenkins_port }}/securityRealm/createAccountByAdmin'
+    user: "{{ admin_user_pass}}"
+    password: '{{ adminpwd.stdout }}'
+    force_basic_auth: yes
+    follow_redirects: all
+    headers:
+      Jenkins-Crumb: '{{ crumb.content.split(":")[1] }}'
+      Cookie: '{{ crumb.set_cookie }}'
+    body: 'username={{ jenkins_user }}&password1={{ jenkins_pass }}&password2={{ jenkins_pass }}&fullname={{ jenkins_fullname }}&email={{ jenkins_email }}'
+
 - name: Install Jenkins Plugins
   jenkins_plugin:
     name: "{{ item }}"
@@ -162,31 +177,6 @@
       - workflow-step-api
       - workflow-support
       - ws-cleanup
-    
-- name: JENKINS-CTEDENTIALS | Add Jenkins administration account
-  uri:
-    method: POST
-    url: 'http://localhost:{{ jenkins_port }}/securityRealm/createAccountByAdmin'
-    user: "{{ admin_user_pass}}"
-    password: '{{ adminpwd.stdout }}'
-    force_basic_auth: yes
-    follow_redirects: all
-    headers:
-      Jenkins-Crumb: '{{ crumb.content.split(":")[1] }}'
-      Cookie: '{{ crumb.set_cookie }}'
-    body: 'username={{ jenkins_user }}&password1={{ jenkins_pass }}&password2={{ jenkins_pass }}&fullname={{ jenkins_fullname }}&email={{ jenkins_email }}'
-
-- name: install plugin
-  jenkins_plugin:
-    name: "{{ item }}"
-    state: latest
-    url_username: admin
-    url_password: "{{ adminpwd.stdout }}"
-  with_items:
-      - kubernetes
-      - sonar
-      - Artifactory
-      - git
     
 - name: systemd-reload
   systemd:

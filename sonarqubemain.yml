@@ -17,7 +17,7 @@
     - sonar_admin_password: abhi
     - project_name: maven
     - project_key: maven
-    - sonar_token: sonar_token
+    - aws_access_key: <provide_aws_access_key>
+    - aws_secret_key: <provide_aws_secret_key>
   tasks:
     - include_tasks: sonarqube.yml
-    #- include_tasks: jenkins.yml

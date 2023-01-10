@@ -255,3 +255,32 @@
 
 - debug:
     msg: "{{ sonar_token }}"
+ 
+- name: copy output to local file
+  copy:
+   content: "{{ sonar_token }}"
+   dest: "/home/ubuntu/token.txt"
+
+- name: Install boto3 python package
+  ansible.builtin.pip:
+    name: boto3
+
+- name: Create s3 bucket to store generated token txt file from local
+  s3_bucket:
+    aws_access_key: 
+    aws_secret_key: 
+    name: cicddevopssolution1289
+    versioning: no
+    tags:
+      name: CICD
+      type: demo
+
+- name: Upload text file from local to created s3 bucket
+  aws_s3:
+    aws_access_key: <accesskey>
+    aws_secret_key: <secretkey>
+    bucket: cicddevopssolution1289
+    object: token.txt
+    src: "/home/ubuntu/token.txt"
+    mode: put
+

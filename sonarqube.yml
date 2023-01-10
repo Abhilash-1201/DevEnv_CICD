@@ -267,8 +267,8 @@
 
 - name: Create s3 bucket to store generated token txt file from local
   s3_bucket:
-    aws_access_key: <accesskey>
-    aws_secret_key: <secretkey>
+    aws_access_key: "{{aws_access_key}}"
+    aws_secret_key: "{{aws_secret_key}}"
     name: cicddevopssolution1289
     versioning: no
     tags:

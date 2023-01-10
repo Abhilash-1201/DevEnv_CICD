@@ -10,6 +10,8 @@
         - apt-transport-https
         - gnupg
         - openjdk-{{ java_version }}-jdk
+        - unzip
+        - python3-pip
       state: present
 
 - name: Add an Apt signing key, uses whichever key is at the URL

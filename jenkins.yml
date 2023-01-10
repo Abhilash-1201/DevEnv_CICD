@@ -216,8 +216,8 @@
 
 - name: GET/DOWNLOAD file from S3 bucket
   amazon.aws.aws_s3:
-    aws_access_key: <accesskey>
-    aws_secret_key: <secretkey>
+    aws_access_key: "{{aws_access_key}}"
+    aws_secret_key: "{{aws_secret_key}}"
     bucket: cicddevopssolution1289
     mode: get
     object: "token.txt"

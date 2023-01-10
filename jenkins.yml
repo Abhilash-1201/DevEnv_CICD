@@ -204,23 +204,45 @@
 
 - set_fact: jenkins_url="{{ jenkinspublic_ip.stdout }}"
 
-
 - name: Download jenkins-cli jar
   ansible.builtin.get_url:
     url: http://{{ jenkins_url }}:8080/jnlpJars/jenkins-cli.jar
     dest: /home/ubuntu
     mode: '0440'
+    
+- name: Install boto3 python package
+  ansible.builtin.pip:
+    name: boto3
+
+- name: GET/DOWNLOAD file from S3 bucket
+  amazon.aws.aws_s3:
+    aws_access_key: <accesskey>
+    aws_secret_key: <secretkey>
+    bucket: cicddevopssolution1289
+    mode: get
+    object: "token.txt"
+    dest: "/home/ubuntu/token.txt"
+
+- name: get remote file contents
+  command: "cat /home/ubuntu/token.txt"
+  register: tokenkey
+
+- name: show key contents
+  debug:
+    var: tokenkey.stdout
+
+- set_fact: sonartoken="{{ tokenkey.stdout }}"
 
 - name: Creating a xml file with content
   copy:
     dest: "/home/ubuntu/credential.xml"
     content: |
-      <org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl> 
+      <org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl>
         <scope>GLOBAL</scope>
         <id>SonarToken</id>
-        <secret>{{ sonar_token }}</secret> 
+        <secret>{{sonartoken}}</secret>
         <description>Sonar Token</description>
-      </org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl> 
+      </org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl>
 
 - name: Run command to set credential in secret
   shell: java -jar jenkins-cli.jar -auth {{jenkins_user}}:{{jenkins_pass}} -s http://{{jenkins_url}}:8080/ create-credentials-by-xml system::system::jenkins _  < credential.xml  

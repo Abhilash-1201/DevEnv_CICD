@@ -277,8 +277,8 @@
 
 - name: Upload text file from local to created s3 bucket
   aws_s3:
-    aws_access_key: <accesskey>
-    aws_secret_key: <secretkey>
+    aws_access_key: "{{aws_access_key}}"
+    aws_secret_key: "{{aws_secret_key}}"
     bucket: cicddevopssolution1289
     object: token.txt
     src: "/home/ubuntu/token.txt"

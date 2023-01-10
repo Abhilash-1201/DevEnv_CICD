@@ -196,6 +196,17 @@
   ansible.builtin.wait_for:
     timeout: 30
   delegate_to: localhost
+  
+- name: Download SonarScanner in the Jenkins Path
+  get_url:
+      url:  https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip
+      dest: /var/lib/jenkins/
+
+- name: Unarchive a Sonar Scanner file that is already on the remote machine
+  ansible.builtin.unarchive:
+    src: /var/lib/jenkins/sonar-scanner-cli-4.2.0.1873-linux.zip
+    dest: /var/lib/jenkins/
+    remote_src: yes
 
 - name: get public IP for Jenkins
   shell: wget -qO- http://ipecho.net/plain ; echo

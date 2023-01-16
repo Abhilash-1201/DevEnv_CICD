@@ -12,6 +12,7 @@
         - openjdk-{{ java_version }}-jdk
         - unzip
         - python3-pip
+        - maven
       state: present
 
 - name: Add an Apt signing key, uses whichever key is at the URL
@@ -260,6 +261,68 @@
 - name: Run command to set credential in secret
   shell: java -jar jenkins-cli.jar -auth {{jenkins_user}}:{{jenkins_pass}} -s http://{{jenkins_url}}:8080/ create-credentials-by-xml system::system::jenkins _  < credential.xml  
 
+##### Updated 16 jan 2023 #####
+#aws cli download ###
+- name: Download AWS CLI binary
+  get_url:
+    url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+    dest: "/home/ubuntu"
+
+- name: Unarchive a Sonar Scanner file that is already on the remote machine
+  ansible.builtin.unarchive:
+    src: /home/ubuntu/awscli-exe-linux-x86_64.zip
+    dest: /home/ubuntu/
+    remote_src: yes
+
+- name: Upgrade AWS CLI V2
+  become: yes
+  shell: ./aws/install
+
+ ### Get sonarqube public ip to store in sonar-scanner.properties file
+- name: Get Public Ip of SonarQube to store in sonar-scanner.properties file
+  shell: aws ec2 describe-instances --filters "Name=tag:Name,Values=DEV_SonarQube" --query 'Reservations[*].Instances[*].PublicIpAddress' --output text
+  register: sonarurl
+
+- name: Print the generated password
+  debug: msg="{{ sonarurl.stdout }}"
+
+- set_fact: sonarqubeurl="{{ sonarurl.stdout }}"
+
+- name: Move sonar-scanner-cli-4.2.0.1873-linux to /opt
+  become: yes
+  shell: mv /var/lib/jenkins/sonar-scanner-4.2.0.1873-linux /opt/sonar-scanner
+
+- name: copy the values in sonar-scanner.properties
+  copy:
+    content: |
+        sonar.login={{sonartoken}}
+        sonar.sourceEncoding=UTF-8
+        sonar.host.url=http://{{sonarqubeurl}}:9000
+    dest: /opt/sonar-scanner/conf/sonar-scanner.properties
+
+- name: copy the PATH in sonar-scanner.sh file
+  copy:
+    content: |
+        #/bin/bash
+        export PATH="$PATH:/opt/sonar-scanner/bin"
+    dest: /etc/profile.d/sonar-scanner.sh
+
+- name: copy the PATH in /etc/environment file
+  copy:
+    content: |
+        PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+        PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/share/maven"
+        PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/opt/sonar-scanner/bin"
+    dest: /etc/environment
+
+- name: Reboot a machine to apply changes
+  ansible.builtin.reboot:
+    reboot_timeout: 200
+    
+- name: Restart Jenkins service
+  service:
+    name: jenkins
+    state: restarted
 
 # - name: Sending an e-mail using Gmail SMTP servers
 #   community.general.mail:

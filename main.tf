@@ -124,6 +124,7 @@ resource "aws_instance" "Jenkins_instance" {
   ami                           = var.ami_id
   associate_public_ip_address   = var.associate_public_ip_address
   instance_type                 = var.instance_type
+  iam_instance_profile          = aws_iam_instance_profile.demo-profile.name
   availability_zone             = var.availability_zone
   key_name                      = var.key_name
   subnet_id                     = var.subnet_pub

@@ -161,6 +161,7 @@
       - scm-api
       - script-security
       - snakeyaml-api
+      - slack
       - ssh-credentials
       - ssh-slaves
       - sshd

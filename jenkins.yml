@@ -325,40 +325,36 @@
     name: jenkins
     state: restarted
 
-# Send jenkins and sonarqube creds to the team 
+# Send jenkins and sonarqube credentials to the team
 
 - name: Sending an e-mail using Gmail SMTP servers
   community.general.mail:
      host: gator4041.hostgator.com
      port: 465
      username: abhilash.rl@cloudjournee.com
-     password: Cjptech@12 
+     password: Cjptech@12
      from: abhilash.rl@cloudjournee.com
      to: deeptanshu.s@cloudjournee.com
+     cc: digin@cloudjournee.com, satya@cloudjournee.com, nayab.s@cloudjournee.com
      subject: Jenkins and SonarQube Details | Dev Environment
      body: |
        Hi Team,
 
        Please find the Jenkins and SonarQube credential details below.
-           
+
        Jenkins Credentials
-      -----------------------------------------
+       -----------------------------------------
 
-      Jenkins URL = http://52.14.187.160:8080
-      Jenkins Username = cloudjournee
-      Jenkins Password = Cjptech@12
+       Jenkins URL = http://{{jenkins_url}}:8080
+       Jenkins Username = {{jenkins_user}}
+       Jenkins Password = {{jenkins_pass}}
 
-      SonarQube Credentials
-      -----------------------------------------
+       SonarQube Credentials
+       -----------------------------------------
 
-      SonarQube URL = http://52.15.83.249:9000
-      SonarQube Username = admin
-      SonarQUbe Password = abhi
+       SonarQube URL = http://{{sonarqubeurl}}:9000
+       SonarQube Username = {{sonar_admin_token}}
+       SonarQUbe Password = {{sonar_admin_password}}
 
-      Regards,
-      Abhilash    
-
-
-    
-
-
+       Regards,
+       Abhilash    

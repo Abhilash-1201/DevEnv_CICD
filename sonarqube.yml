@@ -285,3 +285,11 @@
     src: "/home/ubuntu/token.txt"
     mode: put
 
+#### Create Guest User credentials in to SonarQube #### (M 30/01/2023)
+
+- name: create guest user in sonarqube
+  shell: curl -X POST -u {{ sonar_token }}: "http://{{ sonar_url }}/api/users/create?login={{ guestLogin }}&name={{ guestname }}&password={{guestpassword }}&email={{ guestemail }}"
+  args:
+    executable: /bin/bash
+  register: result
+

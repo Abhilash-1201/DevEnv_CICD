@@ -19,5 +19,9 @@
     - project_key: maven
     - aws_access_key: <provide_aws_access_key>
     - aws_secret_key: <provide_aws_secret_key>
+    - guestLogin: guest01                           #(M 30/01/2023)
+    - guestname: GUEST_USER
+    - guestpassword: guest01
+    - guestemail: rlabhilashabhi07@gmail.com
   tasks:
     - include_tasks: sonarqube.yml

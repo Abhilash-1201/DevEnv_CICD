@@ -93,38 +93,13 @@ resource "aws_instance" "SonarQube_instance" {
   }
 }
 
-#### Create an IAM Role ####
-resource "aws_iam_role" "demo-role" {
-  name = "ec2_role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = "RoleForEC2"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
-}
-
-resource "aws_iam_instance_profile" "demo-profile" {
-  name = "test_profile"
-  role = aws_iam_role.demo-role.name
-}
-
-
 
 ###  Jenkins Instance Creation
 resource "aws_instance" "Jenkins_instance" {
   ami                           = var.ami_id
   associate_public_ip_address   = var.associate_public_ip_address
   instance_type                 = var.instance_type
-  iam_instance_profile          = aws_iam_instance_profile.demo-profile.name
+  iam_instance_profile          = aws_iam_instance_profile.test_profile.name
   availability_zone             = var.availability_zone
   key_name                      = var.key_name
   subnet_id                     = var.subnet_pub
